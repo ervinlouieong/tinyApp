@@ -1,6 +1,12 @@
-<%- include('partials/_header') %>
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <title>TinyApp</title>
+</head>
 
 <body>
+    <%- include partials/_header %>
     <h1> ShortURL - URL </h1>
       <% for (var i in urls) { %>
         <li><b><%= i %></b> - <%= urls[i] %></li>

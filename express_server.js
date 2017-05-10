@@ -8,6 +8,9 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 let urlDatabase = {
   "b2xvn2": "http://www.lighthouselabs.ca",
   "9sm5xk": "http://www.google.com"
@@ -90,6 +93,10 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
+app.post("/login", (req, res) => {
+  res.cookie("username",req.body.username);
+  res.redirect("/urls");
+});
 
 // Listen to the stated PORT
 app.listen(PORT, () => {

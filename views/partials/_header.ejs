@@ -10,6 +10,9 @@
       </form>
       <% if (username) { %>
         <p><%= username %></p>
+          <form action="/logout" method="POST">
+            <input type="submit" name="username" value="Logout">
+          </form>
       <% } %>
   </body>
 </html>

@@ -6,6 +6,7 @@
 </head>
 
 <body>
+  <%- include partials/_header %>
     <h1> ShortURL - URL </h1>
       <li><b><%= shortURL %></b> - <%= longURL %></li>
         <form method="POST" action="/urls/<%= shortURL %>">

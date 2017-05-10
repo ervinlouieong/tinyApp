@@ -50,13 +50,15 @@ app.get("/hello", (req, res) => {
 
 // Show /url page
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { username: req.cookies["username"],
+                       urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 // Create-new-URL-to-be-shoretened page
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = { username: req.cookies["username"]};
+  res.render("urls_new", templateVars);
 });
 
 // Generate new shortURL and redirects to that new page
@@ -68,7 +70,8 @@ app.post("/urls", (req, res) => {
 
 //Go to /url/shorURL page
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id,
+  let templateVars = { username: req.cookies["username"],
+                       shortURL: req.params.id,
                        longURL: urlDatabase[req.params.id]
                      };
   res.render("urls_show", templateVars);

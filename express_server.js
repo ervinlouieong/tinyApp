@@ -1,7 +1,7 @@
 
 const express = require("express");
 const app = express();
-let PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
 
@@ -11,6 +11,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+
+const bcrypt = require("bcrypt");
 
 // initial database
 const urlDatabase = {
@@ -102,6 +104,7 @@ app.get("/urls", (req, res) => {
     res.send("Unauthorized. Log-in or Register first before proceeding");
     return;
   };
+  // comparing and getting the urls under the user logged-in
   let userUrls = urlsForUser(templateVars.user_id);
   let userUrlDatabase = {};
   for (let i in userUrls) {
@@ -152,6 +155,7 @@ app.get("/urls/:id", (req, res) => {
     res.send("Unauthorized. Log-in or Register first before proceeding");
     return;
   };
+  // comparing and getting the urls under the user logged-in
   let userUrls = urlsForUser(templateVars.user_id);
   let userUrlDatabase = {};
   for (let i in userUrls) {
@@ -161,6 +165,7 @@ app.get("/urls/:id", (req, res) => {
       }
     }
   }
+  // checking if the shortUrl is under the user logged-in
   templateVars.longURL = urlDatabase[req.params.id].url;
   if(!(templateVars.user_id === urlDatabase[req.params.id].userId)) {
     res.status(400);
@@ -206,14 +211,14 @@ app.get("/login", (req, res) => {
 // Add login to cookies
 app.post("/login", (req, res) => {
   // Check if email is in DB.
-  var matching_userId = getIds().find(id => users[id].email === req.body.email);
+  let matching_userId = getIds().find(id => users[id].email === req.body.email);
   if(!matching_userId) {
     res.status(403);
     res.send("Incorrect E-mail and/or Password!");
-  } else if (!(users[matching_userId].password === req.body.password)) {
-    // Check if password is correct with the email.
+  // Check if password is correct with the email.
+  } else if (!(bcrypt.compareSync(req.body.password , (users[matching_userId].password)))) {
     res.status(403);
-    res.send("Incorrect E-mail and/or Password!");
+    res.send("Incorrect Password!");
   } else {
     res.cookie("user_id", matching_userId);
     res.redirect("/urls");
@@ -236,8 +241,8 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req,res) => {
   let emailReq = req.body.email;
-  let passwordReq = req.body.password;
-  if (!(emailReq && passwordReq)) {
+  let hashed_password = bcrypt.hashSync(req.body.password, 10);
+  if (!(emailReq && req.body.password)) {
     res.status(400);
     res.send('Please fill in email and/or password.');
     return;
@@ -250,7 +255,8 @@ app.post("/register", (req,res) => {
   users[newId] = {};
   users[newId].id = newId;
   users[newId].email = emailReq;
-  users[newId].password = passwordReq;
+  users[newId].password = hashed_password;
+  // console.log(users);
   res.cookie("user_id", newId);
   res.redirect("/urls");
 });

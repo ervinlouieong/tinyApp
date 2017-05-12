@@ -13,12 +13,16 @@ const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
 // initial database
-// const urlDatabase = {
-//   "b2xvn2": "http://www.lighthouselabs.ca",
-//   "9sm5xk": "http://www.google.com"
-// };
-
-const urlDatabase = {};
+const urlDatabase = {
+  "b2xvn2": {userId: "userRandomID",
+            url: "http://www.lighthouselabs.ca"},
+  "9sm5xk": {userId: "userRandomID",
+            url: "http://www.google.com"},
+  "qwert1": {userId: "user2RandomID",
+            url: "http://www.nike.ca"},
+  "asdfg2": {userId: "thatsMe",
+            url: "http://www.imhungry.now"}
+};
 
 const users = {
   "userRandomID": {
@@ -30,6 +34,11 @@ const users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
+  },
+  "thatsMe": {
+    id: "thatsMe",
+    email: "feedme@now.com",
+    password: "1234"
   }
 };
 
@@ -61,6 +70,16 @@ function getIds() {
 };
 
 
+function urlsForUser(id) {
+  const compiledUrlsForUser = [];
+  for (let k in urlDatabase) {
+    if (urlDatabase[k].userId === id){
+      compiledUrlsForUser.push(k);
+    };
+  };
+  return compiledUrlsForUser;
+};
+
 app.get("/", (req, res) => {
   res.end("Hello!");
 });
@@ -76,8 +95,23 @@ app.get("/", (req, res) => {
 // Show /url page
 app.get("/urls", (req, res) => {
   let templateVars = { user_id: req.cookies["user_id"],
-                       user: users,
-                       urls: urlDatabase };
+                       user: users
+                     };
+  if(!templateVars.user_id) {
+    res.status(400);
+    res.send("Unauthorized. Log-in or Register first before proceeding");
+    return;
+  };
+  let userUrls = urlsForUser(templateVars.user_id);
+  let userUrlDatabase = {};
+  for (let i in userUrls) {
+    for (let j in urlDatabase) {
+      if(userUrls[i] === j) {
+        userUrlDatabase[j] = urlDatabase[j];
+      }
+    }
+  }
+  templateVars.urls = userUrlDatabase;
   res.render("urls_index", templateVars);
 });
 
@@ -96,9 +130,8 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {};
-  urlDatabase[shortURL].id = req.cookies["user_id"];
+  urlDatabase[shortURL].userId = req.cookies["user_id"];
   urlDatabase[shortURL].url = req.body.longURL;
-  // console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -110,17 +143,36 @@ app.get("/urls/:id", (req, res) => {
     res.send("URL not found.");
     return;
   };
-    let templateVars = { user_id: req.cookies["user_id"],
+  let templateVars = { user_id: req.cookies["user_id"],
                          user: users,
-                         shortURL: req.params.id,
-                         longURL: urlDatabase[req.params.id]
+                         shortURL: req.params.id
                        };
-    res.render("urls_show", templateVars);
+  if(!templateVars.user_id) {
+    res.status(400);
+    res.send("Unauthorized. Log-in or Register first before proceeding");
+    return;
+  };
+  let userUrls = urlsForUser(templateVars.user_id);
+  let userUrlDatabase = {};
+  for (let i in userUrls) {
+    for (let j in urlDatabase) {
+      if(userUrls[i] === j) {
+        userUrlDatabase[j] = urlDatabase[j];
+      }
+    }
+  }
+  templateVars.longURL = urlDatabase[req.params.id].url;
+  if(!(templateVars.user_id === urlDatabase[req.params.id].userId)) {
+    res.status(400);
+    res.send("Unauthorize to access page.");
+    return;
+  };
+  res.render("urls_show", templateVars);
 });
 
 // Redirect immediately to the real URL set
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL].url;
   res.redirect(longURL);
 });
 
@@ -152,13 +204,13 @@ app.post("/login", (req, res) => {
   if(!matching_userId) {
     res.status(403);
     res.send("Incorrect E-mail and/or Password!");
-  } else if (!users[matching_userId].password === req.body.password) {
+  } else if (!(users[matching_userId].password === req.body.password)) {
     // Check if password is correct with the email.
     res.status(403);
     res.send("Incorrect E-mail and/or Password!");
   } else {
     res.cookie("user_id", matching_userId);
-    res.redirect("/");
+    res.redirect("/urls");
   };
 });
 

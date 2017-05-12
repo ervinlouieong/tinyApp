@@ -10,12 +10,14 @@
     <h1> ShortURL - URL </h1>
       <% for (var i in urls) { %>
         <li><b><%= i %></b> - <a href=<%= urls[i].url %>><%= urls[i].url %></a></li>
+          <% if (user_id) { %>
           <form method="GET" action="/urls/<%= i %>">
             <button>Edit</button>
           </form>
           <form method="POST" action="/urls/<%= i %>/delete">
             <button>Delete</button>
           </form>
+          <% } %>
       <% } %>
 </body>
 </html>

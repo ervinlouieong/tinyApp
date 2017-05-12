@@ -11,9 +11,9 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const cookieSession = require("cookie-session");
 app.use(cookieSession({
-    name: 'session',
-    keys: ['secret'],
-    maxAge: 24 * 60 * 60 * 1000
+  name: 'session',
+  keys: ['secret'],
+  maxAge: 24 * 60 * 60 * 1000
 }));
 
 const bcrypt = require("bcrypt");
@@ -21,13 +21,13 @@ const bcrypt = require("bcrypt");
 // initial database
 const urlDatabase = {
   "b2xvn2": {userId: "userRandomID",
-            url: "http://www.lighthouselabs.ca"},
+    url: "http://www.lighthouselabs.ca"},
   "9sm5xk": {userId: "userRandomID",
-            url: "http://www.google.com"},
+    url: "http://www.google.com"},
   "qwert1": {userId: "user2RandomID",
-            url: "http://www.nike.ca"},
+    url: "http://www.nike.ca"},
   "asdfg2": {userId: "thatsMe",
-            url: "http://www.imhungry.now"}
+    url: "http://www.imhungry.now"}
 };
 
 const users = {
@@ -36,7 +36,7 @@ const users = {
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
+  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
@@ -54,26 +54,26 @@ function generateRandomString() {
 
   for (let i = 0; i < 6; i += 1 ) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
-  };
+  }
   return text;
-};
+}
 
 
 function getUrls() {
   const compiledUrls = [];
   for (let k in urlDatabase) {
     compiledUrls.push(k);
-  };
+  }
   return compiledUrls;
-};
+}
 
 function getIds() {
   const compiledIds = [];
   for (let k in users) {
     compiledIds.push(k);
-  };
+  }
   return compiledIds;
-};
+}
 
 
 function urlsForUser(id) {
@@ -81,10 +81,10 @@ function urlsForUser(id) {
   for (let k in urlDatabase) {
     if (urlDatabase[k].userId === id){
       compiledUrlsForUser.push(k);
-    };
-  };
+    }
+  }
   return compiledUrlsForUser;
-};
+}
 
 app.get("/", (req, res) => {
   res.end("Hello!");
@@ -101,13 +101,13 @@ app.get("/", (req, res) => {
 // Show /url page
 app.get("/urls", (req, res) => {
   let templateVars = { user_id: req.session.user_id,
-                       user: users
-                     };
+    user: users
+  };
   if(!templateVars.user_id) {
     res.status(400);
     res.send("Unauthorized. Log-in or Register first before proceeding");
     return;
-  };
+  }
   // comparing and getting the urls under the user logged-in
   let userUrls = urlsForUser(templateVars.user_id);
   let userUrlDatabase = {};
@@ -125,11 +125,11 @@ app.get("/urls", (req, res) => {
 // Create-new-URL-to-be-shoretened page
 app.get("/urls/new", (req, res) => {
   let templateVars = { user_id: req.session.user_id,
-                      user: users
-                     };
+    user: users
+  };
   if(!templateVars.user_id) {
     res.redirect("/login");
-  };
+  }
   res.render("urls_new", templateVars);
 });
 
@@ -149,16 +149,16 @@ app.get("/urls/:id", (req, res) => {
     res.status(404);
     res.send("URL not found.");
     return;
-  };
+  }
   let templateVars = { user_id: req.session.user_id,
-                         user: users,
-                         shortURL: req.params.id
-                       };
+    user: users,
+    shortURL: req.params.id
+  };
   if(!templateVars.user_id) {
     res.status(400);
     res.send("Unauthorized. Log-in or Register first before proceeding");
     return;
-  };
+  }
   // comparing and getting the urls under the user logged-in
   let userUrls = urlsForUser(templateVars.user_id);
   let userUrlDatabase = {};
@@ -175,7 +175,7 @@ app.get("/urls/:id", (req, res) => {
     res.status(400);
     res.send("Unauthorize to access page.");
     return;
-  };
+  }
   res.render("urls_show", templateVars);
 });
 
@@ -186,14 +186,14 @@ app.get("/u/:shortURL", (req, res) => {
     res.status(404);
     res.send("URL not found.");
     return;
-  };
+  }
   let longURL = urlDatabase[req.params.shortURL].url;
   res.redirect(longURL);
 });
 
 // Delete a url in database
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id]
+  delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
 
@@ -206,8 +206,8 @@ app.post("/urls/:id", (req, res) => {
 
 app.get("/login", (req, res) => {
   let templateVars = { user_id: req.session.user_id,
-                       user: users
-                     };
+    user: users
+  };
   res.render("urls_login", templateVars);
 });
 
@@ -220,13 +220,13 @@ app.post("/login", (req, res) => {
     res.status(403);
     res.send("Incorrect E-mail and/or Password!");
   // Check if password is correct with the email.
-  } else if (!(bcrypt.compareSync(req.body.password , (users[matching_userId].password)))) {
+  } else if (!(bcrypt.compareSync(req.body.password, (users[matching_userId].password)))) {
     res.status(403);
     res.send("Incorrect Password!");
   } else {
     req.session.user_id = matching_userId;
     res.redirect("/urls");
-  };
+  }
 });
 
 // Remove cookies and logs-out
@@ -238,12 +238,12 @@ app.post("/logout", (req, res) => {
 // Registration page
 app.get("/register", (req, res) => {
   let templateVars = { user_id: req.session.user_id,
-                       user: users
-                     };
-  res.render("urls_register", templateVars)
+    user: users
+  };
+  res.render("urls_register", templateVars);
 });
 
-app.post("/register", (req,res) => {
+app.post("/register", (req, res) => {
   let emailReq = req.body.email;
   let hashed_password = bcrypt.hashSync(req.body.password, 10);
   if (!(emailReq && req.body.password)) {

@@ -1,25 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head></head>
-  <body>
 
-
-        <form method="GET" action="/register">
-         <input type="Submit" value="Register">
-        </form>
-
-        <% if (!user_id) { %>
-          <form method="GET" action="/login">
-            <input type="Submit" value="Log-in">
-          </form>
-        <% } else { %>
-        <p>USER ID: <%= user_id %><br />
-          E-MAIL Address: <%= user[user_id].email %>
-        </p>
-          <form action="/logout" method="POST">
-            <input type="submit" name="username" value="Logout">
-          </form>
-      <% } %>
-
-  </body>
+<head></head>
+<body>
+  <form method="GET" action="/register">
+   <input type="Submit" value="Register">
+  </form>
+  <% if (!user_id) { %>
+    <form method="GET" action="/login">
+      <input type="Submit" value="Log-in">
+    </form>
+  <% } else { %>
+  <p>USER ID: <%= user_id %><br />
+    E-MAIL Address: <%= user[user_id].email %>
+  </p>
+    <form action="/logout" method="POST">
+      <input type="submit" name="username" value="Logout">
+    </form>
+<% } %>
+</body>
 </html>

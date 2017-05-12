@@ -9,7 +9,7 @@
     <%- include partials/_header %>
     <h1> ShortURL - URL </h1>
       <% for (var i in urls) { %>
-        <li><b><%= i %></b> - <%= urls[i] %></li>
+        <li><b><%= i %></b> - <a href=<%= urls[i] %>><%= urls[i] %></a></li>
           <form method="GET" action="/urls/<%= i %>">
             <button>Edit</button>
           </form>

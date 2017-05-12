@@ -5,11 +5,11 @@
   <title>TinyApp</title>
 </head>
 
-<body>
+<body style="font-size:20px; padding:50px;">
     <%- include partials/_header %>
     <h1> ShortURL - URL </h1>
       <% for (var i in urls) { %>
-        <li><b><%= i %></b> - <a href=<%= urls[i] %>><%= urls[i] %></a></li>
+        <li><b><%= i %></b> - <a href=<%= urls[i].url %>><%= urls[i].url %></a></li>
           <form method="GET" action="/urls/<%= i %>">
             <button>Edit</button>
           </form>

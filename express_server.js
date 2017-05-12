@@ -13,10 +13,12 @@ const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
 // initial database
-const urlDatabase = {
-  "b2xvn2": "http://www.lighthouselabs.ca",
-  "9sm5xk": "http://www.google.com"
-};
+// const urlDatabase = {
+//   "b2xvn2": "http://www.lighthouselabs.ca",
+//   "9sm5xk": "http://www.google.com"
+// };
+
+const urlDatabase = {};
 
 const users = {
   "userRandomID": {
@@ -41,13 +43,14 @@ function generateRandomString() {
   return text;
 };
 
-// function getEmailVal() {
-//   const compiledEmails = [];
-//   for (let k in users) {
-//     compiledEmails.push(users[k].email);
-//   };
-//   return compiledEmails;
-// };
+
+function getUrls() {
+  const compiledUrls = [];
+  for (let k in urlDatabase) {
+    compiledUrls.push(k);
+  };
+  return compiledUrls;
+};
 
 function getIds() {
   const compiledIds = [];
@@ -56,14 +59,6 @@ function getIds() {
   };
   return compiledIds;
 };
-
-// function findUserBy(fn) {
-//   for (let uid in users) {
-//     if (fn(users[uid])) {
-//       return users[uid];
-//     }
-//   }
-// }
 
 
 app.get("/", (req, res) => {
@@ -91,25 +86,30 @@ app.get("/urls/new", (req, res) => {
   let templateVars = { user_id: req.cookies["user_id"],
                       user: users
                      };
+  if(!templateVars.user_id) {
+    res.redirect("/login");
+  };
   res.render("urls_new", templateVars);
 });
 
 // Generate new shortURL and redirects to that new page
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = {};
+  urlDatabase[shortURL].id = req.cookies["user_id"];
+  urlDatabase[shortURL].url = req.body.longURL;
+  // console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
 //Go to /url/shorURL page
 app.get("/urls/:id", (req, res) => {
-  // console.log(urlDatabase[req.params.id],req.params.id)
-  //   if (urlDatabase[req.params.id] !== req.params.id) {
-  //     res.status(404);
-  //     res.send('URL not used');
-  //     return;
-  //   };
-
+  let matching_urls = getUrls().find(url => url === req.params.id);
+  if(!matching_urls) {
+    res.status(404);
+    res.send("URL not found.");
+    return;
+  };
     let templateVars = { user_id: req.cookies["user_id"],
                          user: users,
                          shortURL: req.params.id,
@@ -133,7 +133,7 @@ app.post("/urls/:id/delete", (req, res) => {
 // Edit the set URL of a shortened-url
 app.post("/urls/:id", (req, res) => {
   let shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL].url = req.body.longURL;
   res.redirect("/urls");
 });
 
@@ -149,7 +149,6 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   // Check if email is in DB.
   var matching_userId = getIds().find(id => users[id].email === req.body.email);
-  // var user = findUserBy(user => user.email === req.body.email);
   if(!matching_userId) {
     res.status(403);
     res.send("Incorrect E-mail and/or Password!");

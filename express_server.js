@@ -30,21 +30,22 @@ const urlDatabase = {
     url: "http://www.imhungry.now"}
 };
 
+// hashed passwords = qwerty
 const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "$2a$10$OX9w04805Wg1OzJ4AbMP4eI07QaL65gHgJkptzQKpStAz1xsTkoc2"
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "$2a$10$OX9w04805Wg1OzJ4AbMP4eI07QaL65gHgJkptzQKpStAz1xsTkoc2"
   },
   "thatsMe": {
     id: "thatsMe",
     email: "feedme@now.com",
-    password: "1234"
+    password: "$2a$10$OX9w04805Wg1OzJ4AbMP4eI07QaL65gHgJkptzQKpStAz1xsTkoc2"
   }
 };
 
@@ -100,6 +101,9 @@ app.get("/", (req, res) => {
 
 // Show /url page
 app.get("/urls", (req, res) => {
+  if(!req.session.user_id) {
+    return res.redirect('/login');
+  }
   let templateVars = { user_id: req.session.user_id,
     user: users
   };
@@ -222,7 +226,7 @@ app.post("/login", (req, res) => {
   // Check if password is correct with the email.
   } else if (!(bcrypt.compareSync(req.body.password, (users[matching_userId].password)))) {
     res.status(403);
-    res.send("Incorrect Password!");
+    res.send("Incorrect E-mail and/or Password!!");
   } else {
     req.session.user_id = matching_userId;
     res.redirect("/urls");
@@ -240,6 +244,9 @@ app.get("/register", (req, res) => {
   let templateVars = { user_id: req.session.user_id,
     user: users
   };
+  if(templateVars.user_id) {
+    res.redirect("/urls");
+  }
   res.render("urls_register", templateVars);
 });
 
@@ -252,7 +259,7 @@ app.post("/register", (req, res) => {
     return;
   } else if (getIds().find(id => users[id].email === emailReq)) {
     res.status(400);
-    res.send('E-mail Adress already used.');
+    res.send('E-mail Address already used.');
     return;
   }
   let newId = generateRandomString();

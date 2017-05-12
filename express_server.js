@@ -9,8 +9,12 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
+const cookieSession = require("cookie-session");
+app.use(cookieSession({
+    name: 'session',
+    keys: ['secret'],
+    maxAge: 24 * 60 * 60 * 1000
+}));
 
 const bcrypt = require("bcrypt");
 
@@ -96,7 +100,7 @@ app.get("/", (req, res) => {
 
 // Show /url page
 app.get("/urls", (req, res) => {
-  let templateVars = { user_id: req.cookies["user_id"],
+  let templateVars = { user_id: req.session.user_id,
                        user: users
                      };
   if(!templateVars.user_id) {
@@ -120,7 +124,7 @@ app.get("/urls", (req, res) => {
 
 // Create-new-URL-to-be-shoretened page
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user_id: req.cookies["user_id"],
+  let templateVars = { user_id: req.session.user_id,
                       user: users
                      };
   if(!templateVars.user_id) {
@@ -133,7 +137,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {};
-  urlDatabase[shortURL].userId = req.cookies["user_id"];
+  urlDatabase[shortURL].userId = req.session.user_id;
   urlDatabase[shortURL].url = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 });
@@ -146,7 +150,7 @@ app.get("/urls/:id", (req, res) => {
     res.send("URL not found.");
     return;
   };
-  let templateVars = { user_id: req.cookies["user_id"],
+  let templateVars = { user_id: req.session.user_id,
                          user: users,
                          shortURL: req.params.id
                        };
@@ -201,7 +205,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = { user_id: req.cookies["user_id"],
+  let templateVars = { user_id: req.session.user_id,
                        user: users
                      };
   res.render("urls_login", templateVars);
@@ -220,20 +224,20 @@ app.post("/login", (req, res) => {
     res.status(403);
     res.send("Incorrect Password!");
   } else {
-    res.cookie("user_id", matching_userId);
+    req.session.user_id = matching_userId;
     res.redirect("/urls");
   };
 });
 
 // Remove cookies and logs-out
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/login");
 });
 
 // Registration page
 app.get("/register", (req, res) => {
-  let templateVars = { user_id: req.cookies["user_id"],
+  let templateVars = { user_id: req.session.user_id,
                        user: users
                      };
   res.render("urls_register", templateVars)
@@ -257,7 +261,7 @@ app.post("/register", (req,res) => {
   users[newId].email = emailReq;
   users[newId].password = hashed_password;
   // console.log(users);
-  res.cookie("user_id", newId);
+  req.session.user_id = newId;
   res.redirect("/urls");
 });
 

@@ -172,6 +172,12 @@ app.get("/urls/:id", (req, res) => {
 
 // Redirect immediately to the real URL set
 app.get("/u/:shortURL", (req, res) => {
+  let matching_urls = getUrls().find(url => url === req.params.shortURL);
+  if(!matching_urls) {
+    res.status(404);
+    res.send("URL not found.");
+    return;
+  };
   let longURL = urlDatabase[req.params.shortURL].url;
   res.redirect(longURL);
 });

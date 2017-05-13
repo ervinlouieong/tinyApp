@@ -1,4 +1,3 @@
-
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -88,13 +87,13 @@ function urlsForUser(id) {
 
 // Show /url page
 app.get("/urls", (req, res) => {
-  if(!req.session.user_id) {
+  if (!req.session.user_id) {
     return res.redirect('/login');
   }
   let templateVars = { user_id: req.session.user_id,
     user: users
   };
-  if(!templateVars.user_id) {
+  if (!templateVars.user_id) {
     res.status(400);
     res.send("Unauthorized. Log-in or Register first before proceeding");
     return;
@@ -104,7 +103,7 @@ app.get("/urls", (req, res) => {
   let userUrlDatabase = {};
   for (let i in userUrls) {
     for (let j in urlDatabase) {
-      if(userUrls[i] === j) {
+      if (userUrls[i] === j) {
         userUrlDatabase[j] = urlDatabase[j];
       }
     }
@@ -118,7 +117,7 @@ app.get("/urls/new", (req, res) => {
   let templateVars = { user_id: req.session.user_id,
     user: users
   };
-  if(!templateVars.user_id) {
+  if (!templateVars.user_id) {
     res.redirect("/login");
   }
   res.render("urls_new", templateVars);
@@ -136,7 +135,7 @@ app.post("/urls", (req, res) => {
 //Go to /url/shorURL page
 app.get("/urls/:id", (req, res) => {
   let matching_urls = getUrls().find(url => url === req.params.id);
-  if(!matching_urls) {
+  if (!matching_urls) {
     res.status(404);
     res.send("URL not found.");
     return;
@@ -145,7 +144,7 @@ app.get("/urls/:id", (req, res) => {
     user: users,
     shortURL: req.params.id
   };
-  if(!templateVars.user_id) {
+  if (!templateVars.user_id) {
     res.status(400);
     res.send("Unauthorized. Log-in or Register first before proceeding");
     return;
@@ -155,37 +154,19 @@ app.get("/urls/:id", (req, res) => {
   let userUrlDatabase = {};
   for (let i in userUrls) {
     for (let j in urlDatabase) {
-      if(userUrls[i] === j) {
+      if (userUrls[i] === j) {
         userUrlDatabase[j] = urlDatabase[j];
       }
     }
   }
   // checking if the shortUrl is under the user logged-in
   templateVars.longURL = urlDatabase[req.params.id].url;
-  if(!(templateVars.user_id === urlDatabase[req.params.id].userId)) {
+  if (!(templateVars.user_id === urlDatabase[req.params.id].userId)) {
     res.status(400);
     res.send("Unauthorize to access page.");
     return;
   }
   res.render("urls_show", templateVars);
-});
-
-// Redirect immediately to the real URL set
-app.get("/u/:shortURL", (req, res) => {
-  let matching_urls = getUrls().find(url => url === req.params.shortURL);
-  if(!matching_urls) {
-    res.status(404);
-    res.send("URL not found.");
-    return;
-  }
-  let longURL = urlDatabase[req.params.shortURL].url;
-  res.redirect(longURL);
-});
-
-// Delete a url in database
-app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
 });
 
 // Edit the set URL of a shortened-url
@@ -195,6 +176,25 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
+// Delete a url in database
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+});
+
+// Redirect immediately to the real URL set
+app.get("/u/:shortURL", (req, res) => {
+  let matching_urls = getUrls().find(url => url === req.params.shortURL);
+  if (!matching_urls) {
+    res.status(404);
+    res.send("URL not found.");
+    return;
+  }
+  let longURL = urlDatabase[req.params.shortURL].url;
+  res.redirect(longURL);
+});
+
+// log-in page
 app.get("/login", (req, res) => {
   let templateVars = { user_id: req.session.user_id,
     user: users
@@ -207,7 +207,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   // Check if email is in DB.
   let matching_userId = getIds().find(id => users[id].email === req.body.email);
-  if(!matching_userId) {
+  if (!matching_userId) {
     res.status(403);
     res.send("Incorrect E-mail and/or Password!");
   // Check if password is correct with the email.
@@ -231,7 +231,7 @@ app.get("/register", (req, res) => {
   let templateVars = { user_id: req.session.user_id,
     user: users
   };
-  if(templateVars.user_id) {
+  if (templateVars.user_id) {
     res.redirect("/urls");
   }
   res.render("urls_register", templateVars);
@@ -254,7 +254,6 @@ app.post("/register", (req, res) => {
   users[newId].id = newId;
   users[newId].email = emailReq;
   users[newId].password = hashed_password;
-  // console.log(users);
   req.session.user_id = newId;
   res.redirect("/urls");
 });

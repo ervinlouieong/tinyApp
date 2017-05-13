@@ -2,21 +2,19 @@
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 8080;
+const bodyParser = require("body-parser");
+const cookieSession = require("cookie-session");
+const bcrypt = require("bcrypt");
 
 app.set("view engine", "ejs");
 
-// Set middlewares
-const bodyParser = require("body-parser");
+// use middlewares
 app.use(bodyParser.urlencoded({extended: true}));
-
-const cookieSession = require("cookie-session");
 app.use(cookieSession({
   name: 'session',
   keys: ['secret'],
   maxAge: 24 * 60 * 60 * 1000
 }));
-
-const bcrypt = require("bcrypt");
 
 // initial database
 const urlDatabase = {
@@ -59,7 +57,7 @@ function generateRandomString() {
   return text;
 }
 
-
+// get the value/s of urls from the urlDatabase object
 function getUrls() {
   const compiledUrls = [];
   for (let k in urlDatabase) {
@@ -68,6 +66,7 @@ function getUrls() {
   return compiledUrls;
 }
 
+// get the value/s from users object
 function getIds() {
   const compiledIds = [];
   for (let k in users) {
@@ -76,7 +75,7 @@ function getIds() {
   return compiledIds;
 }
 
-
+// compiled the urls for a specific user
 function urlsForUser(id) {
   const compiledUrlsForUser = [];
   for (let k in urlDatabase) {
@@ -86,18 +85,6 @@ function urlsForUser(id) {
   }
   return compiledUrlsForUser;
 }
-
-app.get("/", (req, res) => {
-  res.end("Hello!");
-});
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-// app.get("/hello", (req, res) => {
-//   res.end("<html><body><i>Hello</i> <b>World</b></body></html>\n")
-// });
 
 // Show /url page
 app.get("/urls", (req, res) => {
@@ -276,5 +263,3 @@ app.post("/register", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-

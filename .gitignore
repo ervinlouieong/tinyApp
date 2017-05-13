@@ -1,0 +1,7 @@
+# Dependency directories
+node_modules/
+
+# hidden files
+.DS_Store
+.vscode/
+docs/.DS_Store

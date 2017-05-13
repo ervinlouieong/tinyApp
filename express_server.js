@@ -15,37 +15,13 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000
 }));
 
-// initial database
-const urlDatabase = {
-  "b2xvn2": {userId: "userRandomID",
-    url: "http://www.lighthouselabs.ca"},
-  "9sm5xk": {userId: "userRandomID",
-    url: "http://www.google.com"},
-  "qwert1": {userId: "user2RandomID",
-    url: "http://www.nike.ca"},
-  "asdfg2": {userId: "thatsMe",
-    url: "http://www.imhungry.now"}
-};
+// Variable where url will be stored with the shortened and full URL
+const urlDatabase = {};
 
-// hashed passwords = qwerty
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "$2a$10$OX9w04805Wg1OzJ4AbMP4eI07QaL65gHgJkptzQKpStAz1xsTkoc2"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "$2a$10$OX9w04805Wg1OzJ4AbMP4eI07QaL65gHgJkptzQKpStAz1xsTkoc2"
-  },
-  "thatsMe": {
-    id: "thatsMe",
-    email: "feedme@now.com",
-    password: "$2a$10$OX9w04805Wg1OzJ4AbMP4eI07QaL65gHgJkptzQKpStAz1xsTkoc2"
-  }
-};
+// Variable where users will be stored with user ID, E-mail address, hashed password.
+const users = {};
 
+// Function that generates a 6-characting random string
 function generateRandomString() {
   let text = "";
   const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -56,7 +32,7 @@ function generateRandomString() {
   return text;
 }
 
-// get the value/s of urls from the urlDatabase object
+// Get the value/s of urls from the urlDatabase object
 function getUrls() {
   const compiledUrls = [];
   for (let k in urlDatabase) {
@@ -65,7 +41,7 @@ function getUrls() {
   return compiledUrls;
 }
 
-// get the value/s from users object
+// Get the value/s from users object
 function getIds() {
   const compiledIds = [];
   for (let k in users) {
@@ -74,7 +50,7 @@ function getIds() {
   return compiledIds;
 }
 
-// compiled the urls for a specific user
+// Compiled the urls for a specific user
 function urlsForUser(id) {
   const compiledUrlsForUser = [];
   for (let k in urlDatabase) {
@@ -98,7 +74,7 @@ app.get("/urls", (req, res) => {
     res.send("Unauthorized. Log-in or Register first before proceeding");
     return;
   }
-  // comparing and getting the urls under the user logged-in
+  // Comparing and getting the urls under the user logged-in
   let userUrls = urlsForUser(templateVars.user_id);
   let userUrlDatabase = {};
   for (let i in userUrls) {
@@ -126,9 +102,7 @@ app.get("/urls/new", (req, res) => {
 // Generate new shortURL and redirects to that new page
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = {};
-  urlDatabase[shortURL].userId = req.session.user_id;
-  urlDatabase[shortURL].url = req.body.longURL;
+  urlDatabase[shortURL] = { userId: req.session.user_id, url: req.body.longURL }
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -149,7 +123,7 @@ app.get("/urls/:id", (req, res) => {
     res.send("Unauthorized. Log-in or Register first before proceeding");
     return;
   }
-  // comparing and getting the urls under the user logged-in
+  // Comparing and getting the urls under the user logged-in
   let userUrls = urlsForUser(templateVars.user_id);
   let userUrlDatabase = {};
   for (let i in userUrls) {
@@ -159,7 +133,7 @@ app.get("/urls/:id", (req, res) => {
       }
     }
   }
-  // checking if the shortUrl is under the user logged-in
+  // Checking if the shortUrl is under the user logged-in
   templateVars.longURL = urlDatabase[req.params.id].url;
   if (!(templateVars.user_id === urlDatabase[req.params.id].userId)) {
     res.status(400);
@@ -194,14 +168,13 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-// log-in page
+// Log-in page
 app.get("/login", (req, res) => {
   let templateVars = { user_id: req.session.user_id,
     user: users
   };
   res.render("urls_login", templateVars);
 });
-
 
 // Add login to cookies
 app.post("/login", (req, res) => {
@@ -249,11 +222,9 @@ app.post("/register", (req, res) => {
     res.send('E-mail Address already used.');
     return;
   }
+  // Register the new users
   let newId = generateRandomString();
-  users[newId] = {};
-  users[newId].id = newId;
-  users[newId].email = emailReq;
-  users[newId].password = hashed_password;
+  users[newId] = { id: newId, email: emailReq, password: hashed_password};
   req.session.user_id = newId;
   res.redirect("/urls");
 });

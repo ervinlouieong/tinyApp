@@ -35,8 +35,8 @@ function generateRandomString() {
 // Get the value/s of urls from the urlDatabase object
 function getUrls() {
   const compiledUrls = [];
-  for (let k in urlDatabase) {
-    compiledUrls.push(k);
+  for (let shortUrl in urlDatabase) {
+    compiledUrls.push(shortUrl);
   }
   return compiledUrls;
 }
@@ -44,8 +44,8 @@ function getUrls() {
 // Get the value/s from users object
 function getIds() {
   const compiledIds = [];
-  for (let k in users) {
-    compiledIds.push(k);
+  for (let userId in users) {
+    compiledIds.push(userId);
   }
   return compiledIds;
 }
@@ -53,9 +53,9 @@ function getIds() {
 // Compiled the urls for a specific user
 function urlsForUser(id) {
   const compiledUrlsForUser = [];
-  for (let k in urlDatabase) {
-    if (urlDatabase[k].userId === id){
-      compiledUrlsForUser.push(k);
+  for (let shortUrl in urlDatabase) {
+    if (urlDatabase[shortUrl].userId === id){
+      compiledUrlsForUser.push(shortUrl);
     }
   }
   return compiledUrlsForUser;
@@ -77,10 +77,10 @@ app.get("/urls", (req, res) => {
   // Comparing and getting the urls under the user logged-in
   let userUrls = urlsForUser(templateVars.user_id);
   let userUrlDatabase = {};
-  for (let i in userUrls) {
-    for (let j in urlDatabase) {
-      if (userUrls[i] === j) {
-        userUrlDatabase[j] = urlDatabase[j];
+  for (let urls in userUrls) {
+    for (let shortUrl in urlDatabase) {
+      if (userUrls[urls] === shortUrl) {
+        userUrlDatabase[shortUrl] = urlDatabase[shortUrl];
       }
     }
   }

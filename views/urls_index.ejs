@@ -8,13 +8,13 @@
 <body style="font-size:20px; padding:50px;">
   <%- include partials/_header %>
   <h1> ShortURL - URL </h1>
-    <% for (var i in urls) { %>
-      <li><b><%= i %></b> - <a href=<%= urls[i].url %>><%= urls[i].url %></a></li>
+    <% for (let shortURL in urls) { %>
+      <li><b><%= shortURL %></b> - <a href=<%= urls[shortURL].url %>><%= urls[shortURL].url %></a></li>
         <% if (user_id) { %>
-        <form method="GET" action="/urls/<%= i %>">
+        <form method="GET" action="/urls/<%= shortURL %>">
           <button>Edit</button>
         </form>
-        <form method="POST" action="/urls/<%= i %>/delete">
+        <form method="POST" action="/urls/<%= shortURL %>/delete">
           <button>Delete</button><br />
         </form>
         <% } %>

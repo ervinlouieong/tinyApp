@@ -11,7 +11,7 @@
       <button>URLs Page</button>
     </form>
     <h1> ShortURL - URL </h1>
-      <li><b><%= shortURL %></b> - <%= longURL %></li>
+      <li><a href="/u/<%= shortURL %>"><b><%= shortURL %></b></a> - <%= longURL %></li>
         <form method="POST" action="/urls/<%= shortURL %>">
           <label for="longURL">Enter a URL to change it:</label>
           <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px" value="http://">
